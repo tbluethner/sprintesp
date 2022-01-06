@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <title>Text Editor</title>
+        <meta charset="utf-8">
+    </head>
+    <body style="background-color: #404040; color: white;">
+        <h2 style="color: red; font-family: arial">Text Editor ESP32</h2>
+        <select name="Filenames" id="filenames_list" style="width: 160; text-align: center"></select>
+        <button type="button" onclick="readFilenames()" style="width: 160">Read Filenames</button>
+        <br>
+        <button type="button" onclick="readFile()" style="width: 160">Read selected File</button>
+        <button type="button" onclick="downloadFile()" style="width: 160">Download selected File</button>
+        <br>
+        <button type="button" onclick="createFile()" style="width: 160">Create new File</button>
+        <button type="button" onclick="deleteFile()" style="width: 160">Delete selected File</button>
+        <br>
+        <textarea style="color: white; background-color: black; font-size: 15px" id="content_field" name="Text1" cols="200" rows="40"></textarea>
+        <br>
+        <button type="button" onclick="writeFile()" style="width: 160">Write selected file</button>
+    </body>
+    <script type="text/javascript">
+        function createFile() {
+            var filename = prompt("Filename:");
+            var confirmation = confirm("Are you sure you want to CREATE " + filename + "?");
+            if (confirmation == true) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "/uri_post?signal=fileCreate", false);
+                xmlHttp.setRequestHeader("Filename", filename);
+                xmlHttp.send( null );
+                alert(xmlHttp.responseText);
+                readFilenames();
+                document.getElementById("filenames_list").value = filename;
+                readFile();
+                return;
+            };
+        };
+        function deleteFile() {
+            var filename = document.getElementById("filenames_list").value;
+            var confirmation = confirm("Are you sure you want to DELETE " + filename + "?");
+            if (confirmation == true) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "/uri_post?signal=fileDelete", false);
+                xmlHttp.setRequestHeader("Filename", filename);
+                xmlHttp.send( null );
+                alert(xmlHttp.responseText);
+                readFilenames();
+                readFile();
+                return;
+            };
+        };
+        function writeFile() {
+            var filename = document.getElementById("filenames_list").value;
+            var confirmation = confirm("Are you sure you want to OVERWRITE " + filename + "?");
+            if (confirmation == true) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "/uri_post?signal=fileWrite", false);
+                xmlHttp.setRequestHeader("Filename", filename);
+                xmlHttp.send(document.getElementById("content_field").value);
+                alert(xmlHttp.responseText);
+                return;
+            };
+        };
+        function readFilenames() {
+            var dropdown = document.getElementById("filenames_list");
+            while (dropdown.firstChild) {
+                dropdown.removeChild(dropdown.lastChild);
+            };
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=filenamesRead", false);
+            xmlHttp.setRequestHeader("Foldername", "");
+            xmlHttp.send( null );
+            var filenames_string = xmlHttp.responseText;
+            var filenames = filenames_string.split(";").slice(1, -1);
+            for (temp of filenames) {
+                var option = document.createElement("option");
+                option.text = temp;
+                option.value = temp;
+                dropdown.add(option);
+            };
+            return;
+        };
+        function readFile() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=fileRead", false);
+            xmlHttp.setRequestHeader("Filename", document.getElementById("filenames_list").value);
+            xmlHttp.send( null );
+            file_content = xmlHttp.responseText;
+            document.getElementById("content_field").value = file_content;
+            return;
+        };
+        function downloadFile() {
+            filename = document.getElementById("filenames_list").value;
+            var element = document.createElement('a');
+            element.setAttribute('href', "/download?filename=" + filename);
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            return;
+        };
+        readFilenames();
+    </script>
+</html>

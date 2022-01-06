@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sprint Measurement ESP32</title>
+        <meta charset="utf-8">
+    </head>
+    <body style="background-color: black">
+    <div style="background-color: black; width:1000px; margin:0 auto;">
+        <h2 style="color: white; font-family: arial">Sprint Measurement ESP32</h2>
+        <table border="1" style="color: white; font-family: arial">
+            <tr style="font-weight: bold;">
+                <td>Name</td>
+                <td>Status</td>
+                <td>Operations</td>
+            </tr>
+            <tr>
+                <td>Timer Synchronization</td>
+                <td id="timer_status_text">asynchron</td>
+                <td><button type="button" onclick="syncTimers()">Sync Timers</button></td>
+            </tr>
+            <tr>
+                <td>Timer Count Starting Point</td>
+                <td id="timer_start_count_text"></td>
+                <td><button type="button" onclick="getStartTimecount()">Update</button></td>
+            </tr>
+            <tr>
+                <td>Timer Count End Point</td>
+                <td id="timer_end_count_text"></td>
+                <td><button type="button" onclick="getEndTimecount()">Update</button></td>
+            </tr>
+            <tr>
+                <td>Sprint Measurement Control</td>
+                <td id="sprint_status_text">inactive</td>
+                <td>
+                    <button type="button" onclick="activateSprint()">Activate</button>
+                    <br>
+                    <button type="button" onclick="deactivateSprint()">Deactivate</button>
+                    <br>
+                    <button type="button" onclick="getSprintStatus()">Update</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Last Interrupt Starting Point</td>
+                <td id="last_intr_start_text"></td>
+                <td><button type="button" onclick="getStartIntrTime()">Update</button></td>
+            </tr>
+            <tr>
+                <td>Last Interrupt End Point</td>
+                <td id="last_intr_end_text"></td>
+                <td><button type="button" onclick="getEndIntrTime()">Update</button></td>
+            </tr>
+            <tr>
+                <td>Interrupt Difference</td>
+                <td id="intr_diff_text"></td>
+                <td><button type="button" onclick="calcIntrDiff()">Calculate</button></td>
+            </tr>
+            <tr>
+                <td>Wifi-Control</td>
+                <td id="wifi_status_text">unknown</td>
+                <td>
+                    <button type="button" onclick="toggleWifi()">Wifi on</button>
+                    <br>
+                    <button type="button" onclick="getWifiStatus()">Read Wifi Connection Status</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Alignment control</td>
+                <td></td>
+                <td>
+                    <button type="button" onclick="startAlign()">Start Alignment Laser</button>
+                    <br>
+                    <button type="button" onclick="stopAlign()">Stop Align Laser</button>
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td><select name="Filenames" id="filenames_list" style="width: 100%; text-align: center"></select></td>
+                <td><button type="button" onclick="readFilenames()" style="width: 100%">Read Filenames</button></td>
+            </tr>
+            <tr>
+                <td><button type="button" onclick="readFile()" style="width: 100%">Read selected File</button></td>
+                <td><button type="button" onclick="writeFile()" style="width: 100%">Write selected file</button></td>
+            </tr>
+            <tr>
+                <td><button type="button" onclick="createFile()" style="width: 100%">Create new File</button></td>
+                <td><button type="button" onclick="deleteFile()" style="width: 100%">Delete selected File</button></td>
+                <td><button type="button" onclick="downloadFile()" style="width: 100%">Download selected File</button></td>
+            </tr>
+        </table>
+        <table style="color: white; background-color: black; font-size: 15px; font-family: arial" id="content_table" name="Text1">
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Index</td>
+                <td>Student</td>
+                <td>Times</td>
+            </tr>
+        </table>
+        <br>
+    </div>
+    </body>
+    <script type="text/javascript">
+        function startAlign() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=startAlign", false);
+            xmlHttp.send( null );
+            alert(xmlHttp.responseText);
+            return;
+        };
+        function stopAlign() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=stopAlign", false);
+            xmlHttp.send( null );
+            alert(xmlHttp.responseText);
+            return;
+        };
+        function getStartIntrTime() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "/uri_get?signal=getStartLaserIntr", false);
+            xmlHttp.send( null );
+            document.getElementById("last_intr_start_text").textContent = xmlHttp.responseText;
+            return;
+        };
+        function getEndIntrTime() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "/uri_get?signal=getEndLaserIntr", false);
+            xmlHttp.send( null );
+            document.getElementById("last_intr_end_text").textContent = xmlHttp.responseText;
+            return;
+        };
+        function getSprintStatus() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "/uri_get?signal=getSprintStatus", false);
+            xmlHttp.send( null );
+            document.getElementById("sprint_status_text").textContent = xmlHttp.responseText;
+            return;
+        };
+        function activateSprint() {
+            var xmlHttp = new XMLHttpRequest();
+            getStartTimecount();
+            getEndTimecount();
+            current_start_time = parseInt(document.getElementById("timer_end_count_text").textContent);
+            countdown_start = (current_start_time + 4).toString();
+            xmlHttp.open("POST", "/uri_post?signal=startSprint", false);
+            xmlHttp.setRequestHeader("seconds", countdown_start);
+            xmlHttp.send( null );
+            alert(xmlHttp.responseText);
+            getSprintStatus();
+            return;
+        };
+        function deactivateSprint() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=stopSprint", false);
+            xmlHttp.send( null );
+            alert(xmlHttp.responseText);
+            getSprintStatus();
+            return;
+        };
+        function syncTimers() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=syncTimers", false);
+            xmlHttp.send( null );
+            alert(xmlHttp.responseText);
+            return;
+        };
+        function getWifiStatus() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "/uri_get?signal=getWifiStatus", false);
+            xmlHttp.send( null );
+            document.getElementById("wifi_status_text").textContent = xmlHttp.responseText;
+            return;
+        };
+        function getStartTimecount() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "/uri_get?signal=getStartTimecount", false);
+            xmlHttp.send( null );
+            document.getElementById("timer_start_count_text").textContent = xmlHttp.responseText;
+            return;
+        };
+        function getEndTimecount() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", "/uri_get?signal=getEndTimecount", false);
+            xmlHttp.send( null );
+            document.getElementById("timer_end_count_text").textContent = xmlHttp.responseText;
+            return;
+        };
+        function calcIntrDiff() {
+            getStartIntrTime();
+            getEndIntrTime();
+            start_intr = parseFloat(document.getElementById("last_intr_start_text").textContent);
+            end_intr = parseFloat(document.getElementById("last_intr_end_text").textContent);
+            diff = end_intr - start_intr;
+            document.getElementById("intr_diff_text").textContent = diff.toFixed(3).toString();
+            return;
+        };
+        function toggleWifi() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=toggleWifi", false);
+            xmlHttp.send( null );
+            alert(xmlHttp.responseText);
+            getWifiStatus();
+            return;
+        };
+        function updateRowIndex() {
+            rows = document.getElementById("content_table").getElementsByClassName("dynamic_row");
+            i = 1;
+            for (row of rows) {
+                row.getElementsByClassName("index")[0].firstChild.value = i.toString();
+                i += 1;
+            };
+        };
+        function createFile() {
+            var filename = prompt("Filename:");
+            var confirmation = confirm("Are you sure you want to CREATE " + filename + "?");
+            if (confirmation == true) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "/uri_post?signal=fileCreate", false);
+                xmlHttp.setRequestHeader("Filename", "/SPRINTDATA/" + filename);
+                xmlHttp.send( null );
+                alert(xmlHttp.responseText);
+                readFilenames();
+                document.getElementById("filenames_list").value = filename;
+                readFile();
+                return;
+            };
+        };
+        function deleteFile() {
+            var filename = document.getElementById("filenames_list").value;
+            var confirmation = confirm("Are you sure you want to DELETE " + filename + "?");
+            if (confirmation == true) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "/uri_post?signal=fileDelete", false);
+                xmlHttp.setRequestHeader("Filename", "/SPRINTDATA/" + filename);
+                xmlHttp.send( null );
+                alert(xmlHttp.responseText);
+                readFilenames();
+                readFile();
+                return;
+            };
+        };
+        function writeFile() {
+            var filename = document.getElementById("filenames_list").value;
+            var confirmation = confirm("Are you sure you want to OVERWRITE " + filename + "?");
+            var content = "";
+            if (confirmation == true) {
+                var rows = document.getElementById("content_table").getElementsByTagName("tr"); //slice to not write the table header (line 0)
+                var i = 0;
+                for (row of rows) {
+                    if (i > 0 && i < rows.length - 1) { //rows.length - 1 wegen "+" am Ende
+                        var cells = row.getElementsByTagName("td");
+                        j = 0;
+                        for (cell of cells) { //cells.length - 1 wegen "+" am Ende
+                            if (j > 2 && j < cells.length - 1) {
+                                content += cell.firstChild.value + ";";
+                            };
+                            j += 1;
+                        };
+                        content = content.substr(0, content.length - 1); //chop off last ";"
+                        content += "\n";
+                        }
+                    i += 1;
+                };
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "/uri_post?signal=fileWrite", false);
+                xmlHttp.setRequestHeader("Filename", "/SPRINTDATA/" + filename);
+                xmlHttp.send(content);
+                alert(xmlHttp.responseText);
+                return;
+            };
+        };
+        function readFilenames() {
+            var dropdown = document.getElementById("filenames_list");
+            while (dropdown.firstChild) {
+                dropdown.removeChild(dropdown.lastChild);
+            };
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=filenamesRead", false);
+            xmlHttp.setRequestHeader("Foldername", "/SPRINTDATA");
+            xmlHttp.send( null );
+            var filenames_string = xmlHttp.responseText;
+            var filenames = filenames_string.split(";").slice(1, -1);
+            for (temp of filenames) {
+                var option = document.createElement("option");
+                option.text = temp;
+                option.value = temp;
+                dropdown.add(option);
+            };
+            return;
+        };
+        function deleteRowListener(event) {
+            row = event.target.parentElement.parentElement;
+            index = row.getElementsByTagName("td")[2].firstChild.value;
+            if (confirm("Do you really want to delete line " + index + "?")) {
+                row.remove();
+            };
+            updateRowIndex();
+        };
+        function deleteCellListener(event) {
+            cell = event.target.parentElement;
+            time = cell.firstChild.value;
+            if (time != "") {
+                if (confirm("Do you really want to delete cell " + time + "?")) {
+                    cell.remove();
+                };   
+            } else {
+                if (confirm("Do you really want to delete the empty cell?")) {
+                    cell.remove();
+                };
+            };
+
+        };
+        function addRowListener(event) {
+            table = document.getElementById("content_table");
+            row = event.target.parentElement.parentElement;
+            row_counter = row.parentElement.childElementCount;
+            var name = prompt("Name of Student: ");
+            if (name != "") {
+                row.remove();
+                if (row_counter > 2) { //2 wegen Header und "+" am Ende (werden auch bei leerer Datei generiert)
+                    index = parseInt(document.getElementById("content_table").lastChild.getElementsByTagName("td")[2].firstChild.value) + 1;
+                } else {
+                    index = 1;
+                };
+                row = document.createElement("tr");
+
+                cell = document.createElement("td"); //arrow cell
+                input_field = document.createElement("input");
+                input_field.style.width = "10px";
+                input_field.style.backgroundColor = "blue";
+                input_field.style.color = "white";
+                input_field.value = "↑";
+                input_field.readOnly = true;
+                input_field.addEventListener("click", swapRowUpListener);
+                cell.appendChild(input_field);
+
+                input_field = document.createElement("input");
+                input_field.style.width = "10px";
+                input_field.style.backgroundColor = "blue";
+                input_field.style.color = "white";
+                input_field.value = "↓";
+                input_field.readOnly = true;
+                input_field.addEventListener("click", swapRowDownListener);
+                cell.appendChild(input_field);
+
+                row.appendChild(cell);
+
+                cell = document.createElement("td"); //"X" cell
+                input_field = document.createElement("input");
+                input_field.style.width = "20px";
+                input_field.style.backgroundColor = "red";
+                input_field.value = "X";
+                input_field.readOnly = true;
+                input_field.addEventListener("click", deleteRowListener);
+                cell.appendChild(input_field);
+                row.appendChild(cell);
+
+                cell = document.createElement("td"); //Index cell
+                input_field = document.createElement("input");
+                input_field.value = index;
+                input_field.style.width = "40px";
+                input_field.readOnly = true;
+                cell.appendChild(input_field);
+                cell.className = "index";
+                row.appendChild(cell);
+
+                cell = document.createElement("td"); //Name cell
+                input_field = document.createElement("input");
+                input_field.value = name;
+                cell.appendChild(input_field);
+                cell.className = "dynamic_value";
+                row.appendChild(cell);
+
+                cell = document.createElement("td"); //"+" cell
+                input_field = document.createElement("input");
+                input_field.style.width = "20px";
+                input_field.style.backgroundColor = "green";
+                input_field.value = "+";
+                input_field.readOnly = true;
+                input_field.addEventListener("click", addCellListener);
+                cell.appendChild(input_field);
+                row.appendChild(cell);
+                row.className = "dynamic_row";
+                table.appendChild(row);
+
+                row = document.createElement("tr");
+                cell = document.createElement("td"); //"+" cell
+                input_field = document.createElement("input");
+                input_field.style.width = "20px";
+                input_field.style.backgroundColor = "green";
+                input_field.value = "+";
+                input_field.readOnly = true;
+                input_field.addEventListener("click", addRowListener);
+                cell.appendChild(input_field);
+                row.appendChild(cell);
+                table.appendChild(row);
+            };
+        };
+        function addCellListener(event) {
+            cell = event.target.parentElement;
+            row = cell.parentElement;
+            cell.firstChild.remove();
+            input_field = document.createElement("input");
+            input_field.value = document.getElementById("intr_diff_text").textContent;
+            cell.appendChild(input_field);
+
+            input_field = document.createElement("input");
+            input_field.style.width = "20px";
+            input_field.style.backgroundColor = "red";
+            input_field.value = "X";
+            input_field.readOnly = true;
+            input_field.addEventListener("click", deleteCellListener);
+            cell.appendChild(input_field);
+            cell.className = "dynamic_value";
+
+            cell = document.createElement("td"); //"+" cell
+            input_field = document.createElement("input");
+            input_field.style.width = "20px";
+            input_field.style.backgroundColor = "green";
+            input_field.value = "+";
+            input_field.readOnly = true;
+            input_field.addEventListener("click", addCellListener);
+            cell.appendChild(input_field);
+            row.appendChild(cell);
+
+        };
+        function swapRowUpListener(event) {
+            current_row = event.target.parentElement.parentElement;
+            current_row_cells = current_row.getElementsByTagName("td");
+            current_row_index = current_row.getElementsByClassName("index")[0].firstChild.value;
+            current_row_innerhtml = current_row.innerHTML;
+            if (parseInt(current_row_index) > 1) {
+                future_row = current_row.previousSibling;
+                future_row_cells = future_row.getElementsByTagName("td");
+                future_row_index = future_row.getElementsByClassName("index")[0].firstChild.value;
+                future_row_innerhtml = future_row.innerHTML;
+
+                current_row_dynamic_value_cells = current_row.getElementsByClassName("dynamic_value");
+                future_row_dynamic_value_cells = future_row.getElementsByClassName("dynamic_value");
+
+                current_row_dynamic_values = [];
+                future_row_dynamic_values = [];
+
+                for (cell of current_row_dynamic_value_cells) {
+                    current_row_dynamic_values.push(cell.firstChild.value);
+                };
+                for (cell of future_row_dynamic_value_cells) {
+                    future_row_dynamic_values.push(cell.firstChild.value);
+                };
+
+                current_row.innerHTML = future_row_innerhtml;
+                future_row.innerHTML = current_row_innerhtml;
+
+                current_row.firstChild.firstChild.value = "↑";
+                current_row.firstChild.firstChild.addEventListener("click", swapRowUpListener);
+                current_row.firstChild.lastChild.value = "↓";
+                current_row.firstChild.lastChild.addEventListener("click", swapRowDownListener);
+                current_row_cells[1].firstChild.value = "X";
+                current_row_cells[1].firstChild.addEventListener("click", deleteRowListener);
+                current_row.lastChild.firstChild.value = "+";
+                current_row.lastChild.firstChild.addEventListener("click", addCellListener);
+
+                future_row.firstChild.firstChild.value = "↑";
+                future_row.firstChild.firstChild.addEventListener("click", swapRowUpListener);
+                future_row.firstChild.lastChild.value = "↓";
+                future_row.firstChild.lastChild.addEventListener("click", swapRowDownListener);
+                future_row_cells[1].firstChild.value = "X";
+                future_row_cells[1].firstChild.addEventListener("click", deleteRowListener);
+                future_row.lastChild.firstChild.value = "+";
+                future_row.lastChild.firstChild.addEventListener("click", addCellListener);
+
+                current_row.getElementsByClassName("index")[0].firstChild.value = current_row_index;
+                future_row.getElementsByClassName("index")[0].firstChild.value = future_row_index;
+
+                i = 0;
+                for (cell of future_row_cells) {
+                    if (i > 2 && (i-3) < current_row_dynamic_values.length) {
+                        if (i > 3) {
+                            cell.lastChild.value = "X";
+                            cell.lastChild.addEventListener("click", deleteCellListener);
+                        };
+                        cell.firstChild.value = current_row_dynamic_values[(i-3)];
+                    };
+                    i += 1;
+                };
+                i = 0;
+                for (cell of current_row_cells) {
+                    if (i > 2 && (i-3) < future_row_dynamic_values.length) {
+                        if (i > 3) {
+                            cell.lastChild.value = "X";
+                            cell.lastChild.addEventListener("click", deleteCellListener);
+                        };
+                        cell.firstChild.value = future_row_dynamic_values[(i-3)];
+                    };
+                    i += 1;
+                };
+            };
+            updateRowIndex();
+        };
+        function swapRowDownListener(event) {
+            current_row = event.target.parentElement.parentElement;
+            current_row_cells = current_row.getElementsByTagName("td");
+            current_row_index = current_row.getElementsByClassName("index")[0].firstChild.value;
+            current_row_innerhtml = current_row.innerHTML;
+            if (parseInt(current_row_index) < document.getElementById("content_table").getElementsByClassName("dynamic_row").length) {
+                future_row = current_row.nextSibling;
+                future_row_cells = future_row.getElementsByTagName("td");
+                future_row_index = future_row.getElementsByClassName("index")[0].firstChild.value;
+                future_row_innerhtml = future_row.innerHTML;
+
+                current_row_dynamic_value_cells = current_row.getElementsByClassName("dynamic_value");
+                future_row_dynamic_value_cells = future_row.getElementsByClassName("dynamic_value");
+
+                current_row_dynamic_values = [];
+                future_row_dynamic_values = [];
+
+                for (cell of current_row_dynamic_value_cells) {
+                    current_row_dynamic_values.push(cell.firstChild.value);
+                };
+                for (cell of future_row_dynamic_value_cells) {
+                    future_row_dynamic_values.push(cell.firstChild.value);
+                };
+
+                current_row.innerHTML = future_row_innerhtml;
+                future_row.innerHTML = current_row_innerhtml;
+
+                current_row.firstChild.firstChild.value = "↑";
+                current_row.firstChild.firstChild.addEventListener("click", swapRowUpListener);
+                current_row.firstChild.lastChild.value = "↓";
+                current_row.firstChild.lastChild.addEventListener("click", swapRowDownListener);
+                current_row_cells[1].firstChild.value = "X";
+                current_row_cells[1].firstChild.addEventListener("click", deleteRowListener);
+                current_row.lastChild.firstChild.value = "+";
+                current_row.lastChild.firstChild.addEventListener("click", addCellListener);
+
+                future_row.firstChild.firstChild.value = "↑";
+                future_row.firstChild.firstChild.addEventListener("click", swapRowUpListener);
+                future_row.firstChild.lastChild.value = "↓";
+                future_row.firstChild.lastChild.addEventListener("click", swapRowDownListener);
+                future_row_cells[1].firstChild.value = "X";
+                future_row_cells[1].firstChild.addEventListener("click", deleteRowListener);
+                future_row.lastChild.firstChild.value = "+";
+                future_row.lastChild.firstChild.addEventListener("click", addCellListener);
+
+                current_row.getElementsByClassName("index")[0].firstChild.value = current_row_index;
+                future_row.getElementsByClassName("index")[0].firstChild.value = future_row_index;
+
+                i = 0;
+                for (cell of future_row_cells) {
+                    if (i > 2 && (i-3) < current_row_dynamic_values.length) {
+                        if (i > 3) {
+                            cell.lastChild.value = "X";
+                            cell.lastChild.addEventListener("click", deleteCellListener);
+                        };
+                        cell.firstChild.value = current_row_dynamic_values[(i-3)];
+                    };
+                    i += 1;
+                };
+                i = 0;
+                for (cell of current_row_cells) {
+                    if (i > 2 && (i-3) < future_row_dynamic_values.length) {
+                        if (i > 3) {
+                            cell.lastChild.value = "X";
+                            cell.lastChild.addEventListener("click", deleteCellListener);
+                        };
+                        cell.firstChild.value = future_row_dynamic_values[(i-3)];
+                    };
+                    i += 1;
+                };
+            };
+            updateRowIndex();
+        };
+        function readFile() {
+            //remove old table content
+            table = document.getElementById("content_table");
+            while (table.firstChild) {
+                table.firstChild.remove();
+            }
+            row = document.createElement("tr");
+            row.innerHTML = "<td></td><td></td><td>Index</td><td>Student</td><td>Times</td>";
+            table.appendChild(row);
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/uri_post?signal=fileRead", false);
+            xmlHttp.setRequestHeader("Filename", "/SPRINTDATA/" + document.getElementById("filenames_list").value);
+            xmlHttp.send( null );
+            file_content_array = xmlHttp.responseText.split("\n");
+            var i = 0; //line counter
+            for (line of file_content_array) {
+                if (line.startsWith("#") == 0 && line != "") {
+                    line_array = line.split(";");
+                    row = document.createElement("tr");
+
+                    cell = document.createElement("td"); //arrow cell
+                    input_field = document.createElement("input");
+                    input_field.style.width = "10px";
+                    input_field.style.backgroundColor = "blue";
+                    input_field.style.color = "white";
+                    input_field.value = "↑";
+                    input_field.readOnly = true;
+                    input_field.addEventListener("click", swapRowUpListener);
+                    cell.appendChild(input_field);
+
+                    input_field = document.createElement("input");
+                    input_field.style.width = "10px";
+                    input_field.style.backgroundColor = "blue";
+                    input_field.style.color = "white";
+                    input_field.value = "↓";
+                    input_field.readOnly = true;
+                    input_field.addEventListener("click", swapRowDownListener);
+                    cell.appendChild(input_field);
+
+                    row.appendChild(cell);
+
+                    cell = document.createElement("td"); //"X" cell
+                    input_field = document.createElement("input");
+                    input_field.style.width = "20px";
+                    input_field.style.backgroundColor = "red";
+                    input_field.value = "X";
+                    input_field.readOnly = true;
+                    input_field.addEventListener("click", deleteRowListener);
+                    cell.appendChild(input_field);
+                    row.appendChild(cell);
+
+                    cell = document.createElement("td"); //Index cell
+                    input_field = document.createElement("input");
+                    input_field.value = (i + 1).toString();
+                    input_field.readOnly = true;
+                    cell.appendChild(input_field);
+                    cell.className = "index";
+                    row.appendChild(cell);
+
+                    var j = 0; //cell counter
+                    for (value of line_array) {
+                        cell = document.createElement("td");
+                        input_field = document.createElement("input");
+                        input_field.value = value;
+                        cell.appendChild(input_field);
+
+                        if (j > 0) { //0 = name
+                            input_field = document.createElement("input");
+                            input_field.style.width = "20px";
+                            input_field.style.backgroundColor = "red";
+                            input_field.value = "X";
+                            input_field.readOnly = true;
+                            input_field.addEventListener("click", deleteCellListener);
+                            cell.appendChild(input_field);
+                        };
+                        j += 1;
+
+                        cell.className = "dynamic_value";
+                        row.appendChild(cell);
+                    }
+
+                    cell = document.createElement("td"); //"+" cell
+                    input_field = document.createElement("input");
+                    input_field.style.width = "20px";
+                    input_field.style.backgroundColor = "green";
+                    input_field.value = "+";
+                    input_field.readOnly = true;
+                    input_field.addEventListener("click", addCellListener);
+                    cell.appendChild(input_field);
+                    row.appendChild(cell);
+
+                    row.getElementsByTagName("td")[2].firstChild.style.width = "40px";
+                    row.className = "dynamic_row";
+                    table.appendChild(row);
+                    i += 1;
+                }
+            }
+            row = document.createElement("tr");
+            cell = document.createElement("td"); //"+" cell
+            input_field = document.createElement("input");
+            input_field.style.width = "20px";
+            input_field.style.backgroundColor = "green";
+            input_field.value = "+";
+            input_field.readOnly = true;
+            input_field.addEventListener("click", addRowListener);
+            cell.appendChild(input_field);
+            row.appendChild(cell);
+            table.appendChild(row);
+            return;
+        };
+        function downloadFile() {
+            filename = document.getElementById("filenames_list").value;
+            var element = document.createElement('a');
+            element.setAttribute('href', "/download?filename=" + "/SPRINTDATA/" + filename);
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            return;
+        };
+        readFilenames();
+        getWifiStatus();
+    </script>
+</html>
