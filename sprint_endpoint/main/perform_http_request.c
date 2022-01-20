@@ -62,7 +62,7 @@ esp_err_t perform_http_request(	int method,		//GET or POST
 {	
     esp_http_client_config_t client_cfg = {
         .url = MASTER_URL,
-		.user_data = response_buf,        // Pass address of local buffer to get response
+		.user_data = response_buf,
 		.event_handler = _http_event_handler,
     };
     esp_http_client_handle_t client = esp_http_client_init(&client_cfg);
