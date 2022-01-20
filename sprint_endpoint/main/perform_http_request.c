@@ -51,14 +51,15 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)	{	//handles HTTP cli
     return ESP_OK;
 }
 
-esp_err_t perform_http_request(	int method,				//GET or POST
-								char * signal,			//application specific: parameter determines how "signal" is sent to the other ESP device (at the start of the track)
-								char * post_field,		//buffer containing information to be sent using the POST request body
-								char headers[][2][50],	//array with every element[0] being the headers name, and element[1] being the value assigned to the header
-								int header_count,		//number of headers to be sent
-								char * response_buf,	//buffer containing the HTTP request response
-								int response_buf_len)	//length of the HTTP response buffer
-{	//function to make using ESP-IDF HTTP client requests easier
+//function to make using ESP-IDF HTTP client requests easier
+esp_err_t perform_http_request(	int method,		//GET or POST
+				char * signal,		//application specific: parameter determines how "signal" is sent to the other ESP device (at the start of the track)
+				char * post_field,	//buffer containing information to be sent using the POST request body
+				char headers[][2][50],	//array with every element[0] being the headers name, and element[1] being the value assigned to the header
+				int header_count,	//number of headers to be sent
+				char * response_buf,	//buffer containing the HTTP request response
+				int response_buf_len)	//length of the HTTP response buffer
+{	
     esp_http_client_config_t client_cfg = {
         .url = MASTER_URL,
 		.user_data = response_buf,        // Pass address of local buffer to get response
