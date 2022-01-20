@@ -1,25 +1,25 @@
 //IMPORTANT: CDU 1 Idle task watchdog DISABLED in MENUCONFIG -> Component config -> Common ESP-related -> Watch CPU1 Idle Task!
 
-#include "freertos/FreeRTOS.h"		//FreeRTOS = task scheduling system (also for using multiple CPU cores)
-#include "esp_log.h"			//ESP LOG messages (over UART)
+#include "freertos/FreeRTOS.h"          //FreeRTOS = task scheduling system (also for using multiple CPU cores)
+#include "esp_log.h"                    //ESP LOG messages (over UART)
 #include <stdio.h>
 #include <string.h>
-#include "esp_adc_cal.h"		//ESP analog digital conversion (precise)
-#include "esp_http_server.h"		//ESP HTTP server
-#include <math.h> 			//for pow() function
+#include "esp_adc_cal.h"                //ESP analog digital conversion (precise)
+#include "esp_http_server.h"            //ESP HTTP server
+#include <math.h>                       //for pow() function
 
-#include "hardware_accessibility.h" 	//custom library to utilize GPIO, PWM, ADC, Timer, WIFI
-#include "perform_http_request.h"	//custom library to utilize http client functions to communicate with the sprint measurement START device
+#include "hardware_accessibility.h"     //custom library to utilize GPIO, PWM, ADC, Timer, WIFI
+#include "perform_http_request.h"       //custom library to utilize http client functions to communicate with the sprint measurement START device
 
-#define TAG "SPRINTEND"			//TAG printed before all UART log messages
-#define VOLTAGE_LIMIT 		400	//lower limit for laser receiver diode: 400 mV
+#define TAG            "SPRINTEND"      //TAG printed before all UART log messages
+#define VOLTAGE_LIMIT  400              //lower limit for laser receiver diode: 400 mV
 
-uint8_t in_sprint_mode = 0;		//flag indicating the sprint measurement process being active
-uint8_t in_align_mode = 0;		//flag indicating the laser alignment process being active
+uint8_t in_sprint_mode = 0;             //flag indicating the sprint measurement process being active
+uint8_t in_align_mode = 0;              //flag indicating the laser alignment process being active
 
-char laser_intr_time[30] = "";		//string containing the time (seconds) the light barrier has been interrupted last
+char laser_intr_time[30] = "";          //string containing the time (seconds) the light barrier has been interrupted last
 
-int charToInt(char * array) { 		//helper function converting string to integer
+int charToInt(char * array) {           //helper function converting string to integer
 	int array_len = strlen(array);
 	int result = 0;
 	for (int i = 0; i < array_len; i++) {
@@ -707,12 +707,12 @@ void app_main(void) {	//first function being called on system startup, initializ
 	TaskHandle_t taskBuzzerHandle = NULL;
 
 	taskCreateReturn = xTaskCreatePinnedToCore(
-		main_c0,					//task function
-		"maintask_core0",			//task name
-		3584,						//stack size
-		NULL,						//task parameters
-		18,							//task priority
-		&taskBuzzerHandle,			//task handle
-		0							//task CPU core
+		main_c0,            //task function
+		"maintask_core0",   //task name
+		3584,               //stack size
+		NULL,               //task parameters
+		18,                 //task priority
+		&taskBuzzerHandle,  //task handle
+		0                   //task CPU core
 	);
 }
