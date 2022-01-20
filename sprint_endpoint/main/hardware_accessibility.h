@@ -50,8 +50,8 @@
 #define SD_MODE_MMC 0
 #define SD_MODE_SPI 1
 
-#define TIMER_DIVIDER     40000  //  Hardware timer clock divider
-#define TIMER_SCALE       (TIMER_BASE_CLK / TIMER_DIVIDER)  // convert counter value to seconds
+#define TIMER_DIVIDER     40000                             // Hardware timer clock divider
+#define TIMER_SCALE       (TIMER_BASE_CLK / TIMER_DIVIDER)  // convert hardware counter value to seconds
 #define TIMER_COUNTSTART  0
 
 
