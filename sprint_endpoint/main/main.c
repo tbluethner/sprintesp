@@ -252,13 +252,13 @@ TaskHandle_t startLightBarrier() {	//function initializing the optical time meas
 
 	if (in_sprint_mode == 1) {
 		taskCreateReturn = xTaskCreatePinnedToCore(
-			lightBarrierTask,			//task function
-			"lightBarrierTask",			//task name
-			5000,						//stack size
-			laser_intr_time,			//task parameters
-			configMAX_PRIORITIES - 1,	//task priority
-			&taskVoltageHandle,			//task handle
-			1							//task CPU core
+			lightBarrierTask,          //task function
+			"lightBarrierTask",        //task name
+			5000,                      //stack size
+			laser_intr_time,           //task parameters
+			configMAX_PRIORITIES - 1,  //task priority
+			&taskVoltageHandle,        //task handle
+			1                          //task CPU core
 		);
 	}
     if(taskCreateReturn == pdPASS) {
@@ -304,13 +304,13 @@ TaskHandle_t startAlignIndicator() {	//function initializing the alignment indic
 	BaseType_t taskCreateReturn = NULL;
 	TaskHandle_t taskAlignHandle = NULL;
 	taskCreateReturn = xTaskCreatePinnedToCore(
-		alignIndicatorTask,			//task function
-		"alignIndicatorTask",		//task name
-		5000,						//stack size
-		NULL,						//task parameters
-		configMAX_PRIORITIES - 1,	//task priority
-		&taskAlignHandle,			//task handle
-		1							//task CPU core
+		alignIndicatorTask,        //task function
+		"alignIndicatorTask",      //task name
+		5000,                      //stack size
+		NULL,                      //task parameters
+		configMAX_PRIORITIES - 1,  //task priority
+		&taskAlignHandle,          //task handle
+		1                          //task CPU core
 	);
     if(taskCreateReturn == pdPASS) {
         ESP_LOGI(TAG, "alignIndicatorTask created successfully!");
@@ -346,13 +346,13 @@ TaskHandle_t startCountdownBuzzer() { //function initializing the audible count 
 
 	if (in_sprint_mode == 1) {
 		taskCreateReturn = xTaskCreatePinnedToCore(
-			CountdownBuzzerTask,		//task function
-			"CountdownBuzzerTask",		//task name
-			5000,						//stack size
-			NULL,						//task parameters
-			configMAX_PRIORITIES - 1,	//task priority
-			&taskBuzzerHandle,			//task handle
-			1							//task CPU core
+			CountdownBuzzerTask,       //task function
+			"CountdownBuzzerTask",     //task name
+			5000,                      //stack size
+			NULL,                      //task parameters
+			configMAX_PRIORITIES - 1,  //task priority
+			&taskBuzzerHandle,         //task handle
+			1                          //task CPU core
 		);
 	}
     return taskBuzzerHandle;
