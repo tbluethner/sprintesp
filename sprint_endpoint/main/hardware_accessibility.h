@@ -13,20 +13,20 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define GPIO_INIT_TAG		    "GPIO_INIT"
-#define SD_INIT_TAG			    "SD_INIT"
-#define NETIF_AP_INIT_TAG	  "NETIF_AP_INIT"
-#define NETIF_STA_INIT_TAG	"NETIF_STA_INIT"
-#define WIFI_INIT_TAG		    "WIFI_INIT"
-#define TIMER_INIT_TAG		  "TIMER_INIT"
-#define ADC_INIT_TAG		    "ADC_INIT"
+#define GPIO_INIT_TAG       "GPIO_INIT"
+#define SD_INIT_TAG         "SD_INIT"
+#define NETIF_AP_INIT_TAG   "NETIF_AP_INIT"
+#define NETIF_STA_INIT_TAG  "NETIF_STA_INIT"
+#define WIFI_INIT_TAG       "WIFI_INIT"
+#define TIMER_INIT_TAG      "TIMER_INIT"
+#define ADC_INIT_TAG        "ADC_INIT"
 
-#define LASER_PIN			  GPIO_NUM_33	  //LASER                                                                                   TOGGLE
-#define RED_LED_PIN			GPIO_NUM_27 //LASER indicator: ON if LASER detected, OFF if LASER not detected				                TOGGLE
+#define LASER_PIN			  GPIO_NUM_33 //LASER                                                                                   TOGGLE
+#define RED_LED_PIN			GPIO_NUM_27 //LASER indicator: ON if LASER detected, OFF if LASER not detected                        TOGGLE
 
-#define BUZZER_PIN			GPIO_NUM_32	//Audio (Buzzer)	indicator: various signals (Eg. synchronization, start of measurement)	PWM
-#define BLUE_LED_PIN		GPIO_NUM_25	//WIFI connection	indicator: ON if connected, BLINKING if disconnected					          PWM
-#define GREEN_LED_PIN		GPIO_NUM_26	//synchronization	indicator: OFF if no sync attempted, blinking if synced					        PWM
+#define BUZZER_PIN			GPIO_NUM_32	//Audio (Buzzer)	indicator: various signals (Eg. synchronization, start of measurement)  PWM
+#define BLUE_LED_PIN		GPIO_NUM_25	//WIFI connection	indicator: ON if connected, BLINKING if disconnected                    PWM
+#define GREEN_LED_PIN		GPIO_NUM_26	//synchronization	indicator: OFF if no sync attempted, blinking if synced                 PWM
 
 #define BUZZER_TIMER		  LEDC_TIMER_0
 #define BLUE_LED_TIMER		LEDC_TIMER_1
