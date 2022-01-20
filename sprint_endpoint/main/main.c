@@ -209,7 +209,7 @@ esp_err_t getfavicon(httpd_req_t* req) {		//function to send the favicon.ico fil
 	return ESP_OK;
 }
 
-esp_err_t html_edit(httpd_req_t* req) {	//function to send the html_edit.html file to the requesting HTTP client
+esp_err_t html_edit(httpd_req_t* req) {		//function to send the html_edit.html file to the requesting HTTP client
 	char filename[] = "html_edit.html";
 	sendFile(req, strlen(filename), filename);
 	return ESP_OK;
