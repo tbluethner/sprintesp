@@ -101,6 +101,9 @@
     </div>
     </body>
     <script type="text/javascript">
+//measurement device communication / information gathering functions
+//get... - functions usually ask host device (ESP32 measurement device) for information to be written into a cell of the informations table
+//########################################################################################################
         function startAlign() {
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.open("POST", "/uri_post?signal=startAlign", false);
@@ -202,7 +205,11 @@
             getWifiStatus();
             return;
         };
-        function updateRowIndex() {
+//########################################################################################################
+
+//data table and file management functions
+//########################################################################################################
+        function updateRowIndex() {     //reassigns rising index numbers to the rows of the table; function mostly used after row swap / deletion / addition
             rows = document.getElementById("content_table").getElementsByClassName("dynamic_row");
             i = 1;
             for (row of rows) {
@@ -210,7 +217,7 @@
                 i += 1;
             };
         };
-        function createFile() {
+        function createFile() {     //creates new file; filename has to be entered into prompt
             var filename = prompt("Filename:");
             var confirmation = confirm("Are you sure you want to CREATE " + filename + "?");
             if (confirmation == true) {
@@ -225,7 +232,7 @@
                 return;
             };
         };
-        function deleteFile() {
+        function deleteFile() {     //deletes file selected from the dropdown list
             var filename = document.getElementById("filenames_list").value;
             var confirmation = confirm("Are you sure you want to DELETE " + filename + "?");
             if (confirmation == true) {
@@ -239,7 +246,7 @@
                 return;
             };
         };
-        function writeFile() {
+        function writeFile() {      //writes the content of the table to the file selected from the dropdown list
             var filename = document.getElementById("filenames_list").value;
             var confirmation = confirm("Are you sure you want to OVERWRITE " + filename + "?");
             var content = "";
@@ -269,7 +276,7 @@
                 return;
             };
         };
-        function readFilenames() {
+        function readFilenames() {      //requests a string containing all filenames of the "SPRINTDATA" folder on the SD card; puts filenames into dropdown list 
             var dropdown = document.getElementById("filenames_list");
             while (dropdown.firstChild) {
                 dropdown.removeChild(dropdown.lastChild);
@@ -288,7 +295,7 @@
             };
             return;
         };
-        function deleteRowListener(event) {
+        function deleteRowListener(event) {     //deletes row where the button calling the funciton is located
             row = event.target.parentElement.parentElement;
             index = row.getElementsByTagName("td")[2].firstChild.value;
             if (confirm("Do you really want to delete line " + index + "?")) {
@@ -296,7 +303,7 @@
             };
             updateRowIndex();
         };
-        function deleteCellListener(event) {
+        function deleteCellListener(event) {    //deletes cell where the button calling the function is located
             cell = event.target.parentElement;
             time = cell.firstChild.value;
             if (time != "") {
@@ -310,7 +317,7 @@
             };
 
         };
-        function addRowListener(event) {
+        function addRowListener(event) {    //adds new row at the lower end of the table
             table = document.getElementById("content_table");
             row = event.target.parentElement.parentElement;
             row_counter = row.parentElement.childElementCount;
@@ -396,7 +403,7 @@
                 table.appendChild(row);
             };
         };
-        function addCellListener(event) {
+        function addCellListener(event) {   //adds cell at the left end of a row
             cell = event.target.parentElement;
             row = cell.parentElement;
             cell.firstChild.remove();
@@ -424,7 +431,7 @@
             row.appendChild(cell);
 
         };
-        function swapRowUpListener(event) {
+        function swapRowUpListener(event) {     //swaps information of row selected to be swapped up with previous row
             current_row = event.target.parentElement.parentElement;
             current_row_cells = current_row.getElementsByTagName("td");
             current_row_index = current_row.getElementsByClassName("index")[0].firstChild.value;
@@ -497,7 +504,7 @@
             };
             updateRowIndex();
         };
-        function swapRowDownListener(event) {
+        function swapRowDownListener(event) {   //swaps information of row selected to be swapped down with following row
             current_row = event.target.parentElement.parentElement;
             current_row_cells = current_row.getElementsByTagName("td");
             current_row_index = current_row.getElementsByClassName("index")[0].firstChild.value;
@@ -570,7 +577,7 @@
             };
             updateRowIndex();
         };
-        function readFile() {
+        function readFile() {   //asks for and receives the content of the file selected from dropdown list; puts information into the table
             //remove old table content
             table = document.getElementById("content_table");
             while (table.firstChild) {
@@ -680,7 +687,7 @@
             table.appendChild(row);
             return;
         };
-        function downloadFile() {
+        function downloadFile() {   //prompts a window offering the download of the file selected in the file dropdown list
             filename = document.getElementById("filenames_list").value;
             var element = document.createElement('a');
             element.setAttribute('href', "/download?filename=" + "/SPRINTDATA/" + filename);
@@ -691,7 +698,10 @@
             document.body.removeChild(element);
             return;
         };
-        readFilenames();
-        getWifiStatus();
+//########################################################################################################
+        
+//functions being executed when loading the website
+        readFilenames();    //put all the filenames on the SD card into the file list
+        getWifiStatus();    //read the state of WiFi-connection between the two measurement devices (START and END)
     </script>
 </html>
