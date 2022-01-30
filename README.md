@@ -5,8 +5,8 @@ Code directories:
 - sd_content = website code to manage the ESP32 during operation
 - sprint_startpoint = device without SD slot or website, online http server running in own network
 - sprint_endpoint   = device with SD slot and website, accessible by other devices, operating in dual mode
-\n-> dhcp-server & router of one network
-\n-> loggs as client into other network, to there perform http requests
+<br/>-> dhcp-server & router of one network
+<br/>-> loggs as client into other network, to there perform http requests
 
 Meaning of the LEDs glowing:
 - blue blinking: no WiFi connection
