@@ -11,7 +11,7 @@
 #include "hardware_accessibility.h" //custom library to utilize GPIO, PWM, ADC, Timer, WIFI
 
 #define TAG "SPRINTSTART"           //TAG printed before all UART log messages
-#define VOLTAGE_LIMIT 		400		//lower limit for laser receiver diode: 400 mV
+#define VOLTAGE_LIMIT 		400 //lower limit for laser receiver diode: 400 mV
 
 uint8_t in_sync_mode = 0;           //flag indicating the optical timer synchronization process being active
 uint8_t in_sprint_mode = 0;         //flag indicating the sprint measurement process being active
@@ -100,13 +100,13 @@ TaskHandle_t startLightBarrier() {    //function initializing the optical time m
 
 	if (in_sprint_mode == 1) {
 		taskCreateReturn = xTaskCreatePinnedToCore(
-			lightBarrierTask,			//task function
-			"lightBarrierTask",			//task name
-			5000,						//stack size
-			laser_intr_time,			//task parameters
+			lightBarrierTask,          //task function
+			"lightBarrierTask",        //task name
+			5000,                      //stack size
+			laser_intr_time,           //task parameters
 			configMAX_PRIORITIES - 1,  //task priority
-			&taskVoltageHandle,			//task handle
-			1							//task CPU core
+			&taskVoltageHandle,        //task handle
+			1                          //task CPU core
 		);
 	}
     if(taskCreateReturn == pdPASS) {
@@ -150,13 +150,13 @@ TaskHandle_t startAlignIndicator() {    //function initializing the alignment in
 	BaseType_t taskCreateReturn = NULL;
 	TaskHandle_t taskAlignHandle = NULL;
 	taskCreateReturn = xTaskCreatePinnedToCore(
-		alignIndicatorTask,         //task function
-		"alignIndicatorTask",       //task name
-		5000,                       //stack size
-		NULL,                       //task parameters
-		configMAX_PRIORITIES - 1,	//task priority
-		&taskAlignHandle,			//task handle
-		1							//task CPU core
+		alignIndicatorTask,        //task function
+		"alignIndicatorTask",      //task name
+		5000,                      //stack size
+		NULL,                      //task parameters
+		configMAX_PRIORITIES - 1,  //task priority
+		&taskAlignHandle,          //task handle
+		1                          //task CPU core
 	);
     if(taskCreateReturn == pdPASS) {
         ESP_LOGI(TAG, "alignIndicatorTask created successfully!");
@@ -233,13 +233,13 @@ TaskHandle_t initSyncTimerTask() {    //function initializing the timer synchron
 	TaskHandle_t taskSyncTimerHandle = NULL;
 
 	taskCreateReturn = xTaskCreatePinnedToCore(
-		syncTimerTask,				//task function
-		"syncTimerTask",			//task name
-		5000,						//stack size
-		NULL,						//task parameters
-		configMAX_PRIORITIES - 1,   //task priority
-		&taskSyncTimerHandle,       //task handle
-		1							//task CPU core
+		syncTimerTask,             //task function
+		"syncTimerTask",           //task name
+		5000,                      //stack size
+		NULL,                      //task parameters
+		configMAX_PRIORITIES - 1,  //task priority
+		&taskSyncTimerHandle,      //task handle
+		1                          //task CPU core
 	);
     if(taskCreateReturn == pdPASS) {
         ESP_LOGI(TAG, "syncTimerTask created successfully!");
@@ -275,13 +275,13 @@ TaskHandle_t startCountdownBuzzer() {    //function initializing the audible cou
 
 	if (in_sprint_mode == 1) {
 		taskCreateReturn = xTaskCreatePinnedToCore(
-			CountdownBuzzerTask,		//task function
-			"CountdownBuzzerTask",		//task name
-			5000,						//stack size
-			NULL,						//task parameters
-			configMAX_PRIORITIES - 1,	//task priority
-			&taskBuzzerHandle,			//task handle
-			1							//task CPU core
+			CountdownBuzzerTask,       //task function
+			"CountdownBuzzerTask",     //task name
+			5000,                      //stack size
+			NULL,                      //task parameters
+			configMAX_PRIORITIES - 1,  //task priority
+			&taskBuzzerHandle,         //task handle
+			1                          //task CPU core
 		);
 	}
     return taskBuzzerHandle;
@@ -403,17 +403,18 @@ void main_c0(void)
     vTaskDelete(NULL);
 }
 
-void app_main(void) {
+void app_main(void) {    //first function to start at system startup: starts task only on CPU0
+	                 //-> clearer distinction between basic stuff (core 0) and performance critical tasks (core 1)
 	BaseType_t taskCreateReturn = NULL;
 	TaskHandle_t taskBuzzerHandle = NULL;
 
 	taskCreateReturn = xTaskCreatePinnedToCore(
-		main_c0,					//task function
-		"maintask_core0",			//task name
-		3584,						//stack size
-		NULL,						//task parameters
-		18,                         //task priority
-		&taskBuzzerHandle,			//task handle
-		0							//task CPU core
+		main_c0,                   //task function
+		"maintask_core0",          //task name
+		3584,                      //stack size
+		NULL,                      //task parameters
+		18,                        //task priority
+		&taskBuzzerHandle,         //task handle
+		0                          //task CPU core
 	);
 }
