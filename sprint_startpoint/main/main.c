@@ -1,6 +1,6 @@
 //IMPORTANT: CDU 1 Idle task watchdog DISABLED in menuconfig -> Component config -> Common ESP-related -> Watch CPU1 Idle Task!
 
-#include "freertos/FreeRTOS.h" //FreeRTOS = task scheduling system (also for using multiple CPU cores)
+#include "freertos/FreeRTOS.h"      //FreeRTOS = task scheduling system (also for using multiple CPU cores)
 #include "esp_log.h"                //ESP LOG messages (over UART)
 #include <stdio.h>
 #include <string.h>
@@ -104,7 +104,7 @@ TaskHandle_t startLightBarrier() {    //function initializing the optical time m
 			"lightBarrierTask",			//task name
 			5000,						//stack size
 			laser_intr_time,			//task parameters
-			configMAX_PRIORITIES - 1,	//task priority
+			configMAX_PRIORITIES - 1,  //task priority
 			&taskVoltageHandle,			//task handle
 			1							//task CPU core
 		);
